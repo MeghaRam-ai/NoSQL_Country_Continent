@@ -5,16 +5,17 @@ const ContinentModel = require('../models/Continent')
 
 
 router.post('/add',async(req,res)=>{
+    //check the id and update
     
-    
-    // let countries= [req.body.countries]
     console.log(req)
-
-    const continent= await ContinentModel.create({
-        c_name : req.body.c_name
-        // countries : countries
+    const continent= await ContinentModel.update({
+        query: {
+                c_name : req.body.c_name,
+                countries: req.body.countries 
+            },
+        
+        upsert: true 
     })
-    
     return res.status(200).json({"msg":continent});
 });
 
@@ -25,5 +26,17 @@ router.get('/', async (request, response) => {
     
     response.status(200).json(continents);
 });
+
+
+
+// to delete
+router.delete('/:id',async(req,res)=>{
+    const continent_id = req.params.id;
+    await ContinentModel.findByIdAndDelete({
+        _id: continent_id
+    });
+
+    return res.status(200).json({msg: "Continent Deleted!"});
+})
 
 module.exports = router;

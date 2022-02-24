@@ -25,12 +25,36 @@ router.get('/contains/:filter_text',async(req,res)=>{
 
 });
 
+//this update and add population to a country
+router.post('/udpate_and_add_pop',async(req,res)=>{
+    const countries = await CountryModel.updateOne(
+        {_id:req.body._id},
+        {$set:{population:req.body.population}}
+    )
+    return res.status(200).json(countries);
+})
 
+//get all the countries order by umber of people in that country
+router.get('/orderby_population',async(req,res)=>{
+    const countries= await CountryModel.find().sort( { population: -1 } )
+    return res.status(200).json(countries);
+})
 
-
-
-
-
+//get all countries that have 'u' in their name and population grater
+//than 10000
+router.get('/greaterthan_population',async(req,res)=>{
+    const countries = await CountryModel.aggregate([// return one record, not an array of docs
+        {
+            $match: {   name: {$regex:new RegExp('u')},
+                        population: { $gt: 100000 }
+                    }
+         } 
+        
+     
+    ]);
+    
+    return res.status(200).json(countries);
+})
 
 
 // not optimized
@@ -50,14 +74,15 @@ router.post('/', async (req,res)=>{// async used bec we used await. wait req asy
     //await to wait for the return value
     
     console.log(req.body);
-    const {name,isoCode} = req.body
+    const {name,isoCode,population} = req.body
     continent=req.body.continent
     // console.log(req.body.continent);
     //country-> value returned to the country obj
     const country = await CountryModel.create({ //we dont know how ling it will take to return the respose, so use await
         name:name, //req.body.name if not using const {name,isoCode} = req.body
         isoCode:isoCode,
-        continent:continent
+        population:population,
+        $continent:continent
     })
 
 
@@ -114,3 +139,5 @@ router.put('/:id',async(req,res)=>{
     }
     
 });
+
+
